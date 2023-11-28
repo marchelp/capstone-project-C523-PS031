@@ -33,12 +33,11 @@ module.exports = {
         type: 'javascript/auto',
       },
       {
-        test: /\.(scss|css)$/,
+        test: /\.(css)$/,
         use: [
           'style-loader',
           'css-loader',
           'postcss-loader',
-          'sass-loader',
         ],
       },
     ],
