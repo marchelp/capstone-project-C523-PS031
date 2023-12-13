@@ -6,6 +6,7 @@ import { getButtonColor } from '../../colors'
 import AsideMenuList from './List'
 import { MenuAsideItem } from '../../interfaces'
 import { useRouter } from 'next/router'
+import { useAuth } from '../../auth/AuthContext' // Import useAuth from your AuthContext
 
 type Props = {
   item: MenuAsideItem
@@ -14,7 +15,9 @@ type Props = {
 
 const AsideMenuItem = ({ item, isDropdownList = false }: Props) => {
   const [isLinkActive, setIsLinkActive] = useState(false)
-  const [isDropdownActive, setIsDropdownActive] = useState(false)
+  const [isDropdownActive] = useState(false)
+  const { adminLogout } = useAuth()
+  const router = useRouter()
 
   const activeClassAddon = !item.color && isLinkActive ? 'aside-menu-item-active font-bold' : ''
 
@@ -23,9 +26,7 @@ const AsideMenuItem = ({ item, isDropdownList = false }: Props) => {
   useEffect(() => {
     if (item.href && isReady) {
       const linkPathName = new URL(item.href, location.href).pathname
-
       const activePathname = new URL(asPath, location.href).pathname
-
       setIsLinkActive(linkPathName === activePathname)
     }
   }, [item.href, isReady, asPath])
@@ -52,6 +53,15 @@ const AsideMenuItem = ({ item, isDropdownList = false }: Props) => {
     </>
   )
 
+  const handleLogout = () => {
+    // Perform logout actions here
+    localStorage.removeItem('isAdminAuthenticated')
+    localStorage.removeItem('admin')
+    localStorage.removeItem('adminToken')
+    adminLogout()
+    router.push('/signIn')
+  }
+
   const componentClass = [
     'flex cursor-pointer',
     isDropdownList ? 'py-3 px-6 text-sm' : 'py-3',
@@ -62,16 +72,11 @@ const AsideMenuItem = ({ item, isDropdownList = false }: Props) => {
 
   return (
     <li>
-      {item.href && (
+      <div onClick={item.isLogout ? handleLogout : undefined}>
         <Link href={item.href} target={item.target} className={componentClass}>
           {asideMenuItemInnerContents}
         </Link>
-      )}
-      {!item.href && (
-        <div className={componentClass} onClick={() => setIsDropdownActive(!isDropdownActive)}>
-          {asideMenuItemInnerContents}
-        </div>
-      )}
+      </div>
       {item.menu && (
         <AsideMenuList
           menu={item.menu}

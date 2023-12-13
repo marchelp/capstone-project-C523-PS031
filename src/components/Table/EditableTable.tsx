@@ -8,10 +8,12 @@ import CardBoxModal from '../CardBox/Modal'
 import PillTag from '../PillTag'
 import FormField from '../Form/Field'
 import { Field, Form, Formik } from 'formik'
+import NotificationBar from '../NotificationBar' // Import the NotificationBar component
 
 const EditableTable = () => {
   const [users, setUsers] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
+  const [notification, setNotification] = useState(null)
 
   const perPage = 5
 
@@ -92,12 +94,35 @@ const EditableTable = () => {
   }
 
   const handleDeleteUser = () => {
-    setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userIdToDelete))
-    handleModalAction()
+    if (userIdToDelete) {
+      console.log('Deleting user with ID:', userIdToDelete)
+
+      UserDataSource.deleteUser(userIdToDelete)
+        .then(() => {
+          console.log('User deleted successfully')
+          setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userIdToDelete))
+          setNotification({
+            color: 'success',
+            message: 'User deleted successfully!',
+          })
+          handleModalAction()
+        })
+        .catch((error) => console.error('Error deleting user:', error))
+      setNotification({
+        color: 'danger',
+        message: 'Error deleting user.',
+      })
+    } else {
+      console.warn('No user ID to delete')
+    }
   }
 
   return (
     <>
+      {notification && (
+        <NotificationBar color={notification.color}>{notification.message}</NotificationBar>
+      )}
+
       <CardBoxModal
         title={newStatus === 1 ? 'Aktifkan Status' : 'Non-Aktifkan Status'}
         buttonColor="info"
@@ -110,7 +135,7 @@ const EditableTable = () => {
           Apakah anda yakin ingin <b>{newStatus === 1 ? 'mengaktifkan' : 'menon-aktifkan'}</b>{' '}
           status pengunjung?
         </p>
-        <p>Status yang diubah tidak dapat dikembalikan</p>
+        <p>Anda tetap dapat mengubah status kembali</p>
       </CardBoxModal>
 
       <CardBoxModal
@@ -142,118 +167,119 @@ const EditableTable = () => {
         </Form>
       </Formik>
 
-      <div className="overflow-auto aside-scrollbars-light dark:aside-scrollbars-gray">
-        <table>
-          <thead>
-            <tr>
-              <th>Nama</th>
-              <th>Email</th>
-              <th className="whitespace-nowrap">Lokasi Gunung</th>
-              <th className="whitespace-nowrap">Tanggal Naik</th>
-              <th className="whitespace-nowrap">Tanggal Turun</th>
-              <th className="whitespace-nowrap">Jenis Sampah</th>
-              {/* <th className="whitespace-nowrap">Sampah Plastik</th>
-              <th className="whitespace-nowrap">Sampah Kaleng</th> */}
-              <th className="whitespace-nowrap">Bukti Sampah</th>
-              <th className="whitespace-nowrap">Bukti Registrasi</th>
-              <th className="whitespace-nowrap">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {usersPaginated.map((user) => (
-              <tr key={user.id}>
-                <td data-label="Nama" className="whitespace-nowrap">
-                  {user.name}
-                </td>
-                <td data-label="Email" className="whitespace-nowrap">
-                  {user.email}
-                </td>
-                <td data-label="Lokasi Gunung" className="whitespace-nowrap">
-                  {user.lokasiGunung || '-'}
-                </td>
-                <td data-label="Tanggal Naik" className="lg:w-1 whitespace-nowrap">
-                  <small className="text-gray-500 dark:text-slate-400">
-                    {user.tanggalNaik || '-'}
-                  </small>
-                </td>
-                <td data-label="Tanggal Turun" className="lg:w-1 whitespace-nowrap">
-                  <small className="text-gray-500 dark:text-slate-400">
-                    {user.tanggalTurun || '-'}
-                  </small>
-                </td>
-                <td data-label="Jenis Sampah">{user.jenisSampah}</td>
-                {/* <td data-label="Sampah Plastik">{client.city}</td>
-                <td data-label="Sampah Kaleng">{client.city}</td> */}
-                <td data-label="Bukti Sampah" className="whitespace-nowrap">
-                  {user.buktiSampah}
-                </td>
-                <td data-label="Bukti Registrasi" className="whitespace-nowrap">
-                  {user.buktiRegistrasi}
-                </td>
-                <td data-label="Status" className="lg:w-32 whitespace-nowrap">
-                  {user.statusSampahBawaan ? (
-                    <PillTag label="Aktif" color="success" />
-                  ) : (
-                    <PillTag label="Non-Aktif" color="danger" />
-                  )}
-                </td>
-                <td className="before:hidden lg:w-1 whitespace-nowrap">
-                  <Buttons type="justify-start lg:justify-end" noWrap>
-                    <Button
-                      color="warning"
-                      icon={mdiPencil}
-                      onClick={() => handleButtonClick(user)}
-                      small
-                    />
-                    <Button
-                      color={'success'}
-                      icon={mdiCheckBold}
-                      onClick={() => handleEditStatus(user, 1)}
-                      small
-                      disabled={user.statusSampahBawaan}
-                    />
-                    <Button
-                      color="danger"
-                      icon={mdiCloseThick}
-                      onClick={() => handleEditStatus(user, 0)}
-                      small
-                      disabled={!user.statusSampahBawaan}
-                    />
-                    <Button
-                      color="info"
-                      icon={mdiTrashCan}
-                      onClick={() => {
-                        setUserIdToDelete(user.id)
-                        setIsModalTrashActive(true)
-                      }}
-                      small
-                    />
-                  </Buttons>
-                </td>
+      {users.length === 0 ? (
+        <div className="text-center mt-8">
+          <p>Tidak ada data pengunjung yang ditemukan.</p>
+        </div>
+      ) : (
+        <div className="overflow-auto aside-scrollbars-light dark:aside-scrollbars-gray">
+          <table>
+            <thead>
+              <tr>
+                <th>Nama</th>
+                <th>Email</th>
+                <th className="whitespace-nowrap">Lokasi Gunung</th>
+                <th className="whitespace-nowrap">Tanggal Naik</th>
+                <th className="whitespace-nowrap">Tanggal Turun</th>
+                <th className="whitespace-nowrap">Jenis Sampah</th>
+                <th className="whitespace-nowrap">Bukti Sampah</th>
+                <th className="whitespace-nowrap">Bukti Registrasi</th>
+                <th className="whitespace-nowrap">Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="p-3 lg:px-6 border-t border-gray-100 dark:border-slate-800">
-          <div className="flex flex-col md:flex-row items-center justify-between py-3 md:py-0">
-            <Buttons>
-              {pagesList.map((page) => (
-                <Button
-                  key={page}
-                  active={page === currentPage}
-                  label={page + 1}
-                  color={page === currentPage ? 'lightDark' : 'whiteDark'}
-                  small
-                  onClick={() => setCurrentPage(page)}
-                />
+            </thead>
+            <tbody>
+              {usersPaginated.map((user) => (
+                <tr key={user.id}>
+                  <td data-label="Nama" className="whitespace-nowrap">
+                    {user.name}
+                  </td>
+                  <td data-label="Email" className="whitespace-nowrap">
+                    {user.email}
+                  </td>
+                  <td data-label="Lokasi Gunung" className="whitespace-nowrap">
+                    {user.lokasiGunung || '-'}
+                  </td>
+                  <td data-label="Tanggal Naik" className="lg:w-1 whitespace-nowrap">
+                    <small className="text-gray-500 dark:text-slate-400">
+                      {user.tanggalNaik || '-'}
+                    </small>
+                  </td>
+                  <td data-label="Tanggal Turun" className="lg:w-1 whitespace-nowrap">
+                    <small className="text-gray-500 dark:text-slate-400">
+                      {user.tanggalTurun || '-'}
+                    </small>
+                  </td>
+                  <td data-label="Bukti Sampah" className="whitespace-nowrap">
+                    {user.buktiSampah}
+                  </td>
+                  <td data-label="Bukti Registrasi" className="whitespace-nowrap">
+                    {user.buktiRegistrasi}
+                  </td>
+                  <td data-label="Status" className="lg:w-32 whitespace-nowrap">
+                    {user.statusSampahBawaan ? (
+                      <PillTag label="Aktif" color="success" />
+                    ) : (
+                      <PillTag label="Non-Aktif" color="danger" />
+                    )}
+                  </td>
+                  <td className="before:hidden lg:w-1 whitespace-nowrap">
+                    <Buttons type="justify-start lg:justify-end" noWrap>
+                      <Button
+                        color="warning"
+                        icon={mdiPencil}
+                        onClick={() => handleButtonClick(user)}
+                        small
+                      />
+                      <Button
+                        color={'success'}
+                        icon={mdiCheckBold}
+                        onClick={() => handleEditStatus(user, 1)}
+                        small
+                        disabled={user.statusSampahBawaan}
+                      />
+                      <Button
+                        color="danger"
+                        icon={mdiCloseThick}
+                        onClick={() => handleEditStatus(user, 0)}
+                        small
+                        disabled={!user.statusSampahBawaan}
+                      />
+                      <Button
+                        color="info"
+                        icon={mdiTrashCan}
+                        onClick={() => {
+                          setUserIdToDelete(user.id)
+                          setIsModalTrashActive(true)
+                        }}
+                        small
+                      />
+                    </Buttons>
+                  </td>
+                </tr>
               ))}
-            </Buttons>
-            <small className="mt-6 md:mt-0">
-              Page {currentPage + 1} of {numPages || 1}
-            </small>
+            </tbody>
+          </table>
+          <div className="p-3 lg:px-6 border-t border-gray-100 dark:border-slate-800">
+            <div className="flex flex-col md:flex-row items-center justify-between py-3 md:py-0">
+              <Buttons>
+                {pagesList.map((page) => (
+                  <Button
+                    key={page}
+                    active={page === currentPage}
+                    label={page + 1}
+                    color={page === currentPage ? 'lightDark' : 'whiteDark'}
+                    small
+                    onClick={() => setCurrentPage(page)}
+                  />
+                ))}
+              </Buttons>
+              <small className="mt-6 md:mt-0">
+                Page {currentPage + 1} of {numPages || 1}
+              </small>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   )
 }

@@ -25,8 +25,6 @@ export default function AsideMenuLayer({ menu, className = '', ...props }: Props
 
   const handleAsideLgCloseClick = (e: React.MouseEvent) => {
     e.preventDefault()
-    localStorage.removeItem('isAdminAuthenticated');
-    localStorage.removeItem('admin');
     props.onAsideLgCloseClick()
   }
 

@@ -18,10 +18,11 @@ export const AuthProvider = ({ children }) => {
           admin: action.payload,
         };
       case 'ADMIN_LOGOUT':
+        // Clear tokens and other relevant data when logging out
+        localStorage.removeItem('isAdminAuthenticated');
+        localStorage.removeItem('admin');
         return {
-          ...state,
-          isAdminAuthenticated: false,
-          admin: null,
+          ...initialState,
         };
       default:
         return state;

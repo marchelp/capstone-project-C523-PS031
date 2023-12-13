@@ -9,6 +9,8 @@ import NavBarMenuList from '../MenuList'
 import { useAppDispatch, useAppSelector } from '../../../stores/hooks'
 import { MenuNavBarItem } from '../../../interfaces'
 import { setDarkMode } from '../../../stores/darkModeSlice'
+import { useAuth } from '../../../auth/AuthContext'
+import { useRouter } from 'next/router'
 
 type Props = {
   item: MenuNavBarItem
@@ -16,6 +18,8 @@ type Props = {
 
 export default function NavBarItem({ item }: Props) {
   const dispatch = useAppDispatch()
+  const { adminLogout } = useAuth()
+  const router = useRouter()
 
   const userName = useAppSelector((state) => state.main.userName)
 
@@ -39,6 +43,15 @@ export default function NavBarItem({ item }: Props) {
 
     if (item.isToggleLightDark) {
       dispatch(setDarkMode(null))
+    }
+
+    if (item.isLogout) {
+      // Handle logout here
+      localStorage.removeItem('isAdminAuthenticated');
+      localStorage.removeItem('admin');
+      localStorage.removeItem('adminToken');
+      adminLogout();
+      router.push('/signIn');
     }
   }
 
