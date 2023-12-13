@@ -34,4 +34,4 @@ ErrorPage.getLayout = function getLayout(page: ReactElement) {
   return <LayoutGuest>{page}</LayoutGuest>
 }
 
-export default ErrorPage
+export default ErrorPage;

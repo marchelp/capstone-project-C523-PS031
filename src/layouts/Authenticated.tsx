@@ -9,6 +9,7 @@ import NavBarItemPlain from '../components/NavBar/Item/Plain'
 import AsideMenu from '../components/AsideMenu'
 import FooterBar from '../components/FooterBar'
 import { useRouter } from 'next/router'
+import withAdminAuth from '../auth/withAdminAuth'
 
 type Props = {
   children: ReactNode
@@ -37,7 +38,8 @@ export default function LayoutAuthenticated({ children }: Props) {
 
   const layoutAsidePadding = 'xl:pl-60'
 
-  return (
+  // Apply withAdminAuth HOC to ensure components are visible only when authenticated
+  const AuthenticatedLayout = withAdminAuth(() => (
     <div className={`overflow-hidden lg:overflow-visible`}>
       <div
         className={`${layoutAsidePadding} ${
@@ -46,7 +48,9 @@ export default function LayoutAuthenticated({ children }: Props) {
       >
         <NavBar
           menu={menuNavBar}
-          className={`${layoutAsidePadding} ${isAsideMobileExpanded ? 'ml-60 lg:ml-0' : ''}`}
+          className={`${layoutAsidePadding} ${
+            isAsideMobileExpanded ? 'ml-60 lg:ml-0' : ''
+          }`}
         >
           <NavBarItemPlain
             display="flex lg:hidden"
@@ -68,8 +72,46 @@ export default function LayoutAuthenticated({ children }: Props) {
           onAsideLgClose={() => setIsAsideLgActive(false)}
         />
         {children}
-        <FooterBar/>
+        <FooterBar />
       </div>
     </div>
-  )
+  ));
+
+  return <AuthenticatedLayout />;
+
+  // return (
+  //   <div className={`overflow-hidden lg:overflow-visible`}>
+  //     <div
+  //       className={`${layoutAsidePadding} ${
+  //         isAsideMobileExpanded ? 'ml-60 lg:ml-0' : ''
+  //       } pt-14 min-h-screen w-screen transition-position lg:w-auto bg-gray-50 dark:bg-slate-800 dark:text-slate-100`}
+  //     >
+  //       <NavBar
+  //         menu={menuNavBar}
+  //         className={`${layoutAsidePadding} ${isAsideMobileExpanded ? 'ml-60 lg:ml-0' : ''}`}
+  //       >
+  //         <NavBarItemPlain
+  //           display="flex lg:hidden"
+  //           onClick={() => setIsAsideMobileExpanded(!isAsideMobileExpanded)}
+  //         >
+  //           <Icon path={isAsideMobileExpanded ? mdiBackburger : mdiForwardburger} size="24" />
+  //         </NavBarItemPlain>
+  //         <NavBarItemPlain
+  //           display="hidden lg:flex xl:hidden"
+  //           onClick={() => setIsAsideLgActive(true)}
+  //         >
+  //           <Icon path={mdiMenu} size="24" />
+  //         </NavBarItemPlain>
+  //       </NavBar>
+  //       <AsideMenu
+  //         isAsideMobileExpanded={isAsideMobileExpanded}
+  //         isAsideLgActive={isAsideLgActive}
+  //         menu={menuAside}
+  //         onAsideLgClose={() => setIsAsideLgActive(false)}
+  //       />
+  //       {children}
+  //       <FooterBar/>
+  //     </div>
+  //   </div>
+  // )
 }

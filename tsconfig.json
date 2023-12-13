@@ -23,7 +23,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx"
-  ],
+, "src/auth/withAdminAuth.js", "src/auth/AuthContext.js"  ],
   "exclude": [
     "node_modules"
   ]

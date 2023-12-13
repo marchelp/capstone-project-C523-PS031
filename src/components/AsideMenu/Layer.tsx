@@ -20,11 +20,13 @@ export default function AsideMenuLayer({ menu, className = '', ...props }: Props
     icon: mdiLogout,
     color: 'info',
     isLogout: true,
-    href: '/login',
+    href: '/signIn',
   }
 
   const handleAsideLgCloseClick = (e: React.MouseEvent) => {
     e.preventDefault()
+    localStorage.removeItem('isAdminAuthenticated');
+    localStorage.removeItem('admin');
     props.onAsideLgCloseClick()
   }
 

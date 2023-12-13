@@ -15,7 +15,7 @@ const IndexPage = () => {
     dispatch(setDarkMode(false));
 
     // Redirect to /login
-    router.push('/login');
+    router.push('/signIn');
   }, [dispatch, router]);
 
   return (

@@ -71,6 +71,26 @@ const EditableTable = () => {
     )
   }
 
+  const [userToChangeStatus, setUserToChangeStatus] = useState(null)
+  const [newStatus, setNewStatus] = useState(null)
+
+  const handleStatusChange = () => {
+    if (userToChangeStatus && newStatus !== null) {
+      if (newStatus === 1) {
+        setStatusToActive(userToChangeStatus.id)
+      } else {
+        setStatusToInactive(userToChangeStatus.id)
+      }
+      setIsModalInfoActive(false)
+    }
+  }
+
+  const handleEditStatus = (user, status) => {
+    setUserToChangeStatus(user)
+    setNewStatus(status)
+    setIsModalInfoActive(true)
+  }
+
   const handleDeleteUser = () => {
     setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userIdToDelete))
     handleModalAction()
@@ -79,17 +99,18 @@ const EditableTable = () => {
   return (
     <>
       <CardBoxModal
-        title="Sample modal"
+        title={newStatus === 1 ? 'Aktifkan Status' : 'Non-Aktifkan Status'}
         buttonColor="info"
-        buttonLabel="Done"
+        buttonLabel="Confirm"
         isActive={isModalInfoActive}
-        onConfirm={handleModalAction}
+        onConfirm={handleStatusChange}
         onCancel={handleModalAction}
       >
         <p>
-          Lorem ipsum dolor sit amet <b>adipiscing elit</b>
+          Apakah anda yakin ingin <b>{newStatus === 1 ? 'mengaktifkan' : 'menon-aktifkan'}</b>{' '}
+          status pengunjung?
         </p>
-        <p>This is sample modal</p>
+        <p>Status yang diubah tidak dapat dikembalikan</p>
       </CardBoxModal>
 
       <CardBoxModal
@@ -185,16 +206,16 @@ const EditableTable = () => {
                       small
                     />
                     <Button
-                      color="success"
+                      color={'success'}
                       icon={mdiCheckBold}
-                      onClick={() => setStatusToActive(user.id)}
+                      onClick={() => handleEditStatus(user, 1)}
                       small
-                      disabled={user.statusSampahBawaan ? true : false}
+                      disabled={user.statusSampahBawaan}
                     />
                     <Button
                       color="danger"
                       icon={mdiCloseThick}
-                      onClick={() => setStatusToInactive(user.id)}
+                      onClick={() => handleEditStatus(user, 0)}
                       small
                       disabled={!user.statusSampahBawaan}
                     />
